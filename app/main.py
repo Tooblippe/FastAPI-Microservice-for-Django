@@ -109,7 +109,7 @@ async def img_echo_view(file: UploadFile = File(...), settings: Settings = Depen
     img.save(dest)
     return dest
 
-app.mount("/frontend", StaticFiles(directory="./frontend/dist", html=True), name="frontend")
-app.mount("/css", StaticFiles(directory="./frontend/dist/css", html=True), name="frontend")
-app.mount("/js", StaticFiles(directory="./frontend/dist/js", html=True), name="frontend")
-app.mount("/img", StaticFiles(directory="./frontend/dist/img", html=True), name="frontend")
+app.mount("/frontend", StaticFiles(directory="./frontend/build-frontend", html=True), name="frontend")
+app.mount("/css", StaticFiles(directory="./frontend/build-frontend/css", html=True), name="frontend")
+app.mount("/js", StaticFiles(directory="./frontend/build-frontend/js", html=True), name="frontend")
+# app.mount("/img", StaticFiles(directory="./frontend/build-frontend/img", html=True), name="frontend")
