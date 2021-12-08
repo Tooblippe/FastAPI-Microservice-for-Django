@@ -14,6 +14,8 @@ from fastapi import (
     File,
     UploadFile
 )
+from fastapi.staticfiles import StaticFiles
+
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseSettings
@@ -51,6 +53,8 @@ if DEBUG:
 else:
     app = FastAPI(docs_url=None, redoc_url=None)
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+
+
 
 
 @app.get("/", response_class=HTMLResponse)  # http GET -> JSON
@@ -104,3 +108,8 @@ async def img_echo_view(file: UploadFile = File(...), settings: Settings = Depen
     dest = UPLOAD_DIR / f"{uuid.uuid1()}{fext}"
     img.save(dest)
     return dest
+
+app.mount("/frontend", StaticFiles(directory="./frontend/dist", html=True), name="frontend")
+app.mount("/css", StaticFiles(directory="./frontend/dist/css", html=True), name="frontend")
+app.mount("/js", StaticFiles(directory="./frontend/dist/js", html=True), name="frontend")
+app.mount("/img", StaticFiles(directory="./frontend/dist/img", html=True), name="frontend")

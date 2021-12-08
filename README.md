@@ -15,6 +15,7 @@ Here's a list of the packages we will use to accomplish this:
 - Requests
 - Docker
 - and more
+-
 
 ## Want to just run the app?
 Click below to deploy to DigitalOcean. Be sure to grab your $100 credit [here](https://do.co/cfe-github).

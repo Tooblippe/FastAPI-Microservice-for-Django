@@ -48,6 +48,8 @@ def test_prediction_upload():
                                files={"file": open(path, 'rb')},
                                headers={"Authorization": f"JWT {settings.app_auth_token}"}
                                )
+
+        print(response.json())
         if img is None:
             assert response.status_code == 400
         else:
