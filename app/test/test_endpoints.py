@@ -9,6 +9,12 @@ from app.main import app, BASE_DIR, UPLOAD_DIR, get_settings
 client = TestClient(app)
 
 
+def test_test():
+    response = client.post("/test/")
+    assert response.json() == {'status': 'ok'}
+    assert "application/json" in response.headers['content-type']
+
+
 def test_home_view():
     response = client.get("/")  # requests.get("") # python requests
     assert response.text != "<h1>Hello world</h1>"
@@ -49,7 +55,6 @@ def test_prediction_upload():
                                headers={"Authorization": f"JWT {settings.app_auth_token}"}
                                )
 
-        print(response.json())
         if img is None:
             assert response.status_code == 400
         else:

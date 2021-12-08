@@ -14,12 +14,11 @@ from fastapi import (
     File,
     UploadFile
 )
-from fastapi.staticfiles import StaticFiles
-
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseSettings
-
 
 
 class Settings(BaseSettings):
@@ -44,7 +43,6 @@ if DEBUG:
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 
-print(settings)
 BASE_DIR = pathlib.Path(__file__).parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 
@@ -53,21 +51,22 @@ if DEBUG:
 else:
     app = FastAPI(docs_url=None, redoc_url=None)
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
-
-
-
-
-# @app.get("/", response_class=HTMLResponse)  # http GET -> JSON
-# def home_view(request: Request, settings: Settings = Depends(get_settings)):
-#     return templates.TemplateResponse("home.html", {"request": request, "abc": 123})
-
+origins = [
+    "http://localhost",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def verify_auth(authorization=Header(None), settings: Settings = Depends(get_settings)):
     """
     Authorization: Bearer <token>
     {"authorization": "Bearer <token>"}
     """
-
     if settings.debug and settings.skip_auth:
         return
     if authorization is None:
@@ -75,6 +74,11 @@ def verify_auth(authorization=Header(None), settings: Settings = Depends(get_set
     label, token = authorization.split()
     if token != settings.app_auth_token:
         raise HTTPException(detail="Invalid endpoint", status_code=401)
+
+
+@app.post("/test/")
+def test(request: Request):
+    return {"status": "ok"}
 
 
 @app.post("/")  # http POST
@@ -109,7 +113,8 @@ async def img_echo_view(file: UploadFile = File(...), settings: Settings = Depen
     img.save(dest)
     return dest
 
+
 app.mount("/", StaticFiles(directory="./frontend/build-frontend", html=True), name="frontend")
-app.mount("/css", StaticFiles(directory="./frontend/build-frontend/css", html=True), name="frontend")
+# app.mount("/css", StaticFiles(directory="./frontend/build-frontend/css", html=True), name="frontend")
 app.mount("/js", StaticFiles(directory="./frontend/build-frontend/js", html=True), name="frontend")
 # app.mount("/img", StaticFiles(directory="./frontend/build-frontend/img", html=True), name="frontend")
