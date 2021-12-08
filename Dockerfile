@@ -1,7 +1,7 @@
 FROM python:3.8-slim
 
 COPY ./app /app
-COPY ./frontend /frontend
+COPY ./frontend/build-frontend /frontend/build-frontend
 COPY ./entrypoint.sh /entrypoint.sh
 COPY ./requirements.txt /requirements.txt
 
