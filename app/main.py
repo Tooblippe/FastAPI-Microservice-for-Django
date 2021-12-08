@@ -46,7 +46,10 @@ print(settings)
 BASE_DIR = pathlib.Path(__file__).parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 
-app = FastAPI()
+if DEBUG:
+    app = FastAPI()
+else:
+    app = FastAPI(docs_url=None, redoc_url=None)
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
