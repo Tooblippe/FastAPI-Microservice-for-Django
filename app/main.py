@@ -57,9 +57,9 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
 
-@app.get("/", response_class=HTMLResponse)  # http GET -> JSON
-def home_view(request: Request, settings: Settings = Depends(get_settings)):
-    return templates.TemplateResponse("home.html", {"request": request, "abc": 123})
+# @app.get("/", response_class=HTMLResponse)  # http GET -> JSON
+# def home_view(request: Request, settings: Settings = Depends(get_settings)):
+#     return templates.TemplateResponse("home.html", {"request": request, "abc": 123})
 
 
 def verify_auth(authorization=Header(None), settings: Settings = Depends(get_settings)):
@@ -109,7 +109,7 @@ async def img_echo_view(file: UploadFile = File(...), settings: Settings = Depen
     img.save(dest)
     return dest
 
-app.mount("/frontend", StaticFiles(directory="./frontend/build-frontend", html=True), name="frontend")
+app.mount("/", StaticFiles(directory="./frontend/build-frontend", html=True), name="frontend")
 app.mount("/css", StaticFiles(directory="./frontend/build-frontend/css", html=True), name="frontend")
 app.mount("/js", StaticFiles(directory="./frontend/build-frontend/js", html=True), name="frontend")
 # app.mount("/img", StaticFiles(directory="./frontend/build-frontend/img", html=True), name="frontend")
