@@ -1,25 +1,26 @@
-import shutil
-import time
 import io
-from fastapi.testclient import TestClient
-from app.main import app, BASE_DIR, UPLOAD_DIR, get_settings
+import shutil
 
 from PIL import Image, ImageChops
+from fastapi.testclient import TestClient
+
+from app.main import app, BASE_DIR, UPLOAD_DIR, get_settings
 
 client = TestClient(app)
 
-def test_get_home():
-    response = client.get("/") # requests.get("") # python requests
+
+def test_home_view():
+    response = client.get("/")  # requests.get("") # python requests
     assert response.text != "<h1>Hello world</h1>"
     assert response.status_code == 200
-    assert  "text/html" in response.headers['content-type']
-
+    assert "text/html" in response.headers['content-type']
 
 
 def test_invalid_file_upload_error():
-    response = client.post("/") # requests.post("") # python requests
+    response = client.post("/")  # requests.post("") # python requests
     assert response.status_code == 422
-    assert  "application/json" in response.headers['content-type']
+    assert "application/json" in response.headers['content-type']
+
 
 def test_prediction_upload_missing_headers():
     img_saved_path = BASE_DIR / "images"
@@ -30,8 +31,8 @@ def test_prediction_upload_missing_headers():
         except:
             img = None
         response = client.post("/",
-            files={"file": open(path, 'rb')}
-        )
+                               files={"file": open(path, 'rb')}
+                               )
         assert response.status_code == 401
 
 
@@ -44,9 +45,9 @@ def test_prediction_upload():
         except:
             img = None
         response = client.post("/",
-            files={"file": open(path, 'rb')},
-            headers={"Authorization": f"JWT {settings.app_auth_token}"}
-        )
+                               files={"file": open(path, 'rb')},
+                               headers={"Authorization": f"JWT {settings.app_auth_token}"}
+                               )
         if img is None:
             assert response.status_code == 400
         else:
