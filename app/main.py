@@ -3,6 +3,7 @@ import pathlib
 import uuid
 from functools import lru_cache
 
+import cv2
 import pytesseract
 from PIL import Image
 from fastapi import (
@@ -14,10 +15,11 @@ from fastapi import (
     File,
     UploadFile
 )
-from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 from pydantic import BaseSettings
 
 
@@ -42,7 +44,6 @@ DEBUG = settings.debug
 if DEBUG:
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-
 BASE_DIR = pathlib.Path(__file__).parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 
@@ -52,15 +53,18 @@ else:
     app = FastAPI(docs_url=None, redoc_url=None)
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 origins = [
-    "http://localhost",
+        "http://localhost",
+        "http://localhost:8081",
+
 ]
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
 )
+
 
 def verify_auth(authorization=Header(None), settings: Settings = Depends(get_settings)):
     """
@@ -76,9 +80,31 @@ def verify_auth(authorization=Header(None), settings: Settings = Depends(get_set
         raise HTTPException(detail="Invalid endpoint", status_code=401)
 
 
-@app.post("/test/")
-def test(request: Request):
-    return {"status": "ok"}
+@app.get("/load_image/")
+async def load_image():
+    print('test')
+    print('test')
+    print('test')
+    print('test')
+    return FileResponse("app/images/test_account.png")
+
+
+class clickCords(BaseModel):
+    x1: int = 0
+    y1: int = 0
+    width: int = 0
+    height: int = 0
+
+
+@app.post("/words/")
+async def words(coords: clickCords):
+    print('words')
+    image = cv2.imread('app/images/test_account.png')
+    clone = image.copy()
+    roi = clone[coords.y1:coords.height, coords.x1:coords.width]
+    cv2.imwrite('temp3.png', roi)
+    prediction = pytesseract.image_to_string(Image.open(f'temp3.png')).replace("\n\x0c", "")
+    return {"prediction": prediction}
 
 
 @app.post("/")  # http POST
@@ -117,4 +143,5 @@ async def img_echo_view(file: UploadFile = File(...), settings: Settings = Depen
 app.mount("/", StaticFiles(directory="./frontend/build-frontend", html=True), name="frontend")
 # app.mount("/css", StaticFiles(directory="./frontend/build-frontend/css", html=True), name="frontend")
 app.mount("/js", StaticFiles(directory="./frontend/build-frontend/js", html=True), name="frontend")
+app.mount("/images", StaticFiles(directory="./app/images", html=True), name="images")
 # app.mount("/img", StaticFiles(directory="./frontend/build-frontend/img", html=True), name="frontend")
