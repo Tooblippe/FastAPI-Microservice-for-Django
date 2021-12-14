@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "fronend": "vue-cli-service serve --port 8081",
-    "build": "vue-cli-service build --dest build-frontend --watch",
+    "build": "vue-cli-service build --dest build-frontend",
+    "build-prod": "vue-cli-service build --dest build-frontend --mode production",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

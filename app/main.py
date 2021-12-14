@@ -15,10 +15,14 @@ from fastapi import (
     File,
     UploadFile
 )
+import fitz
+from PIL import Image
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fitz import Rect
 from pydantic import BaseModel
 from pydantic import BaseSettings
 
@@ -82,10 +86,6 @@ def verify_auth(authorization=Header(None), settings: Settings = Depends(get_set
 
 @app.get("/load_image/")
 async def load_image():
-    print('test')
-    print('test')
-    print('test')
-    print('test')
     return FileResponse("app/images/test_account.png")
 
 
@@ -94,16 +94,20 @@ class clickCords(BaseModel):
     y1: int = 0
     width: int = 0
     height: int = 0
+    page_num: int=1
 
 
 @app.post("/words/")
 async def words(coords: clickCords):
     print('words')
-    image = cv2.imread('app/images/test_account.png')
-    clone = image.copy()
-    roi = clone[coords.y1:coords.height, coords.x1:coords.width]
-    cv2.imwrite('temp3.png', roi)
-    prediction = pytesseract.image_to_string(Image.open(f'temp3.png')).replace("\n\x0c", "")
+    pdf = fitz.open("C:\\Users\\tobie\PycharmProjects\\pdf-scraper\\app\\images\\ingress.pdf")
+    image = pdf[1].get_pixmap(matrix=fitz.Matrix(10, 10), clip=Rect(coords.x1, coords.y1,coords.width, coords.height))
+    # image = cv2.imread('app/images/test_account.png')
+    # clone = image.copy()
+    # roi = clone[coords.y1:coords.height, coords.x1:coords.width]
+    # cv2.imwrite('temp3.png',image)
+    image.save('temp.png')
+    prediction = pytesseract.image_to_string(Image.open(f'temp.png')).replace("\n\x0c", "")
     return {"prediction": prediction}
 
 
